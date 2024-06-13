@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <style>
+    /* Custom styles for the audio player */
+    .audio-player {
+      width: 300px;
+      padding: 20px;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .audio-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .audio-controls button {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      margin: 0 10px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .audio-controls button:hover {
+      background-color: #2980b9;
+    }
+
+    .loading {
+        font-size: 24px;
+        font-family: Arial, sans-serif;
+        display: inline-block;
+    }
+
+    @keyframes dots {
+        0%, 100% {
+            content: '.';
+        }
+        33% {
+            content: '..';
+        }
+        66% {
+            content: '...';
+        }
+    }
+
+    .loading::after {
+        content: '.';
+        animation: dots 1.5s steps(1, end) infinite;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="audio-player">
+    <!-- Customized audio player -->
+    <audio controls id="audioPlayer">
+      <source src="" id="audioSource" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    <div class="audio-controls">
+      <button onclick="document.querySelector('audio').play()">▶️</button>
+      <button onclick="document.querySelector('audio').pause()">⏸️</button>
+      <button onclick="document.querySelector('audio').volume += 0.1">🔊</button>
+      <button onclick="document.querySelector('audio').volume -= 0.1">🔈</button>
+    </div>
+  </div>
+
+  <div>
+    <textarea id="tt" placeholder="输入文字，等待片刻，在上面播放！"></textarea>
+  </div>
+
+  <div>
+    <button onclick="generate()">
+      生成语音
+      <span id="loading" class=""></span>
+    </button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    function generate () {
+      const tt = document.getElementById('tt')
+      const txt = tt.value
+
+      build(txt)
+    }
+
+    function build (txt) {
+      document.getElementById('loading').className = 'loading'
+      axios.post('http://localhost:8000/generate', {
+        "text": txt,
+        "voice_adj": 2222,
+        "temperature": 0.4,
+        "top_p": 0.7,
+        "top_k": 20,
+        speed: 3,
+        oral: 2,
+        laugh: 0,
+        break_value: 4,
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        responseType: 'blob',
+      }).then(res => {
+        const url = URL.createObjectURL(new Blob([res.data], { type: 'audio/wav' }));
+        console.log(url)
+        // const atag = document
+        const audioTag = document.getElementById('audioSource')
+        audioTag.src = url
+        document.getElementById('audioPlayer').load()
+
+        document.getElementById('loading').className = ''
+        document.querySelector('audio').play()
+      })
+    }
+  </script>
+</body>
+
+</html>
