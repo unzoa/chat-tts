@@ -88,6 +88,7 @@
       生成语音
       <span id="loading" class=""></span>
     </button>
+    <a href="" id="download_node" download>Download Audio</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -119,6 +120,8 @@
       }).then(res => {
         const url = URL.createObjectURL(new Blob([res.data], { type: 'audio/wav' }));
         console.log(url)
+
+        document.getElementById('download_node').href = url
         // const atag = document
         const audioTag = document.getElementById('audioSource')
         audioTag.src = url
